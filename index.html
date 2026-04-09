@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoverCraft — AI Cover Letters in Seconds</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a18;
+    --ink-soft: #5a5a54;
+    --ink-muted: #9a9a92;
+    --paper: #faf9f6;
+    --paper-warm: #f2f0ea;
+    --accent: #2d5a3d;
+    --accent-light: #e8f0ea;
+    --accent-mid: #4a8c62;
+    --gold: #c4973a;
+    --gold-light: #fdf6e8;
+    --border: rgba(26,26,24,0.12);
+    --border-soft: rgba(26,26,24,0.07);
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* --- Header --- */
+  header {
+    border-bottom: 1px solid var(--border-soft);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    background: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--accent-mid); }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
+  .uses-badge {
+    font-size: 12px;
+    color: var(--ink-soft);
+    background: var(--paper-warm);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+  }
+
+  .uses-badge strong { color: var(--accent); }
+
+  .upgrade-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 20px;
+    padding: 7px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.1s;
+    display: none;
+  }
+
+  .upgrade-btn:hover { background: #234a30; transform: translateY(-1px); }
+  .upgrade-btn.visible { display: inline-block; }
+
+  /* --- Hero --- */
+  .hero {
+    text-align: center;
+    padding: 4rem 2rem 2.5rem;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .hero-eyebrow {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-mid);
+    margin-bottom: 12px;
+  }
+
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 6vw, 52px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em { color: var(--accent-mid); font-style: italic; }
+
+  .hero p {
+    font-size: 17px;
+    color: var(--ink-soft);
+    font-weight: 300;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* --- Main form card --- */
+  .main-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  .form-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-soft);
+    padding: 0 1.5rem;
+    gap: 0;
+  }
+
+  .tab {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    padding: 14px 0;
+    margin-right: 24px;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .form-body { padding: 1.5rem; }
+
+  .field { margin-bottom: 1.25rem; }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+
+  .field label .optional {
+    font-weight: 400;
+    color: var(--ink-muted);
+    font-size: 11px;
+    margin-left: 4px;
+  }
+
+  .field textarea, .field input[type="text"] {
+    width: 100%;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    resize: vertical;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    line-height: 1.6;
+  }
+
+  .field textarea:focus, .field input:focus {
+    outline: none;
+    border-color: var(--accent-mid);
+    box-shadow: 0 0 0 3px rgba(74,140,98,0.12);
+  }
+
+  .field textarea::placeholder, .field input::placeholder { color: var(--ink-muted); }
+
+  .tone-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .tone-option input { display: none; }
+
+  .tone-option label {
+    display: block;
+    text-align: center;
+    padding: 9px 6px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+    margin: 0;
+  }
+
+  .tone-option input:checked + label {
+    background: var(--accent-light);
+    border-color: var(--accent-mid);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .tone-option label:hover { border-color: var(--accent-mid); }
+
+  .generate-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-top: 0.5rem;
+  }
+
+  .generate-btn:hover:not(:disabled) { background: #234a30; transform: translateY(-1px); }
+  .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* --- Output --- */
+  .output-wrap { display: none; margin-top: 1.5rem; }
+  .output-wrap.visible { display: block; }
+
+  .output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .output-label {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+  }
+
+  .copy-btn {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-light);
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .copy-btn:hover { background: #d4e6d8; }
+
+  .output-text {
+    background: var(--paper);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--ink);
+    white-space: pre-wrap;
+    min-height: 200px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* typing cursor */
+  .output-text.streaming::after {
+    content: '▋';
+    animation: blink 0.8s infinite;
+    color: var(--accent-mid);
+    font-size: 12px;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* --- Paywall overlay --- */
+  .paywall {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+
+  .paywall.visible { display: block; }
+
+  .paywall-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--gold-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 22px;
+  }
+
+  .paywall h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+
+  .paywall p {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .paywall-btn {
+    display: inline-block;
+    background: var(--gold);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 13px 32px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .paywall-btn:hover { background: #a87d2e; transform: translateY(-1px); }
+
+  .paywall-perks {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .perk {
+    font-size: 12px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .perk-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-mid);
+    flex-shrink: 0;
+  }
+
+  /* --- Loading spinner --- */
+  .spinner {
+    display: none;
+    margin: 2rem auto;
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  .spinner.visible { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* --- Error --- */
+  .error-msg {
+    display: none;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #991b1b;
+    margin-top: 1rem;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* --- Social proof strip --- */
+  .proof-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 2rem 2rem 1rem;
+    flex-wrap: wrap;
+  }
+
+  .proof-item {
+    font-size: 13px;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .proof-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--accent-mid);
+    border-radius: 50%;
+  }
+
+  /* --- Footer --- */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 12px;
+    color: var(--ink-muted);
+    border-top: 1px solid var(--border-soft);
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 520px) {
+    .hero { padding: 2.5rem 1rem 2rem; }
+    .form-body { padding: 1rem; }
+    .tone-grid { grid-template-columns: repeat(2, 1fr); }
+    .tabs { padding: 0 1rem; }
+    header { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Cover<span>Craft</span></div>
+  <div class="header-right">
+    <span class="uses-badge" id="usesBadge">
+      <strong id="usesLeft">3</strong> free uses left
+    </span>
+    <a href="YOUR_STRIPE_PAYMENT_LINK_HERE" class="upgrade-btn" id="upgradeBtn" target="_blank">
+      Upgrade — $9/mo
+    </a>
+  </div>
+</header>
+
+<section class="hero">
+  <p class="hero-eyebrow">AI-powered · Tailored · Instant</p>
+  <h1>Cover letters that<br><em>actually</em> get interviews</h1>
+  <p>Paste a job description and your experience. Get a professional, personalized cover letter in seconds.</p>
+</section>
+
+<div class="proof-strip">
+  <span class="proof-item"><span class="proof-dot"></span>No sign-up required</span>
+  <span class="proof-item"><span class="proof-dot"></span>3 free letters to start</span>
+  <span class="proof-item"><span class="proof-dot"></span>Tailored to every job</span>
+  <span class="proof-item"><span class="proof-dot"></span>Takes 30 seconds</span>
+</div>
+
+<div class="main-wrap">
+  <div class="form-card">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('generate')">Generate</button>
+      <button class="tab" onclick="switchTab('howto')">How it works</button>
+    </div>
+
+    <div class="form-body" id="tab-generate">
+
+      <div class="field">
+        <label>Job description <span class="optional">— paste the full listing or key requirements</span></label>
+        <textarea id="jobDesc" rows="5" placeholder="e.g. We're looking for a Customer Success Manager with 2+ years experience, strong communication skills, and familiarity with Salesforce..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Your experience & highlights <span class="optional">— bullet points are fine</span></label>
+        <textarea id="experience" rows="4" placeholder="e.g. 3 years in customer support at SaaS company, reduced churn by 15%, managed 50+ enterprise accounts, proficient in Salesforce and HubSpot..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Your name <span class="optional"></span></label>
+        <input type="text" id="userName" placeholder="e.g. Sarah Johnson">
+      </div>
+
+      <div class="field">
+        <label>Tone</label>
+        <div class="tone-grid">
+          <div class="tone-option">
+            <input type="radio" name="tone" id="tone1" value="professional" checked>
+            <label for="tone1">Professional</label>
+          </div>
+          <div class="tone-option">
+            <input type="radio" name="tone" id="tone2" value="enthusiastic">
+            <label for="tone2">Enthusiastic</label>
+          </div>
+          <div class="tone-option">
+            <input type="radio" name="tone" id="tone3" value="concise">
+            <label for="tone3">Concise</label>
+          </div>
+          <div class="tone-option">
+            <input type="radio" name="tone" id="tone4" value="creative">
+            <label for="tone4">Creative</label>
+          </div>
+          <div class="tone-option">
+            <input type="radio" name="tone" id="tone5" value="formal">
+            <label for="tone5">Formal</label>
+          </div>
+          <div class="tone-option">
+            <input type="radio" name="tone" id="tone6" value="conversational">
+            <label for="tone6">Conversational</label>
+          </div>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn" onclick="generateLetter()">
+        Generate my cover letter
+      </button>
+
+      <div class="error-msg" id="errorMsg"></div>
+      <div class="spinner" id="spinner"></div>
+
+      <div class="output-wrap" id="outputWrap">
+        <div class="output-header">
+          <span class="output-label">Your cover letter</span>
+          <button class="copy-btn" onclick="copyLetter()">Copy to clipboard</button>
+        </div>
+        <div class="output-text" id="outputText"></div>
+      </div>
+
+      <div class="paywall" id="paywall">
+        <div class="paywall-icon">✦</div>
+        <h3>You've used your 3 free letters</h3>
+        <p>Upgrade to Pro for unlimited cover letters, premium tones, and priority generation — all for less than a coffee a week.</p>
+        <a href="YOUR_STRIPE_PAYMENT_LINK_HERE" class="paywall-btn" target="_blank">
+          Upgrade to Pro — $9/month
+        </a>
+        <div class="paywall-perks">
+          <span class="perk"><span class="perk-dot"></span>Unlimited letters</span>
+          <span class="perk"><span class="perk-dot"></span>Cancel anytime</span>
+          <span class="perk"><span class="perk-dot"></span>New features first</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="form-body" id="tab-howto" style="display:none;">
+      <div style="max-width: 480px; margin: 0 auto; padding: 1rem 0;">
+        <div style="display:flex; flex-direction:column; gap: 1.5rem;">
+          <div style="display:flex; gap:16px; align-items:flex-start;">
+            <div style="width:32px; height:32px; border-radius:50%; background:var(--accent-light); color:var(--accent); font-weight:500; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</div>
+            <div>
+              <p style="font-weight:500; margin-bottom:4px;">Paste the job description</p>
+              <p style="font-size:14px; color:var(--ink-soft);">Copy the job posting or paste the key requirements and responsibilities.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:16px; align-items:flex-start;">
+            <div style="width:32px; height:32px; border-radius:50%; background:var(--accent-light); color:var(--accent); font-weight:500; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</div>
+            <div>
+              <p style="font-weight:500; margin-bottom:4px;">Add your experience</p>
+              <p style="font-size:14px; color:var(--ink-soft);">A few bullet points about your relevant background is all you need. No full resume required.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:16px; align-items:flex-start;">
+            <div style="width:32px; height:32px; border-radius:50%; background:var(--accent-light); color:var(--accent); font-weight:500; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</div>
+            <div>
+              <p style="font-weight:500; margin-bottom:4px;">Get a tailored letter instantly</p>
+              <p style="font-size:14px; color:var(--ink-soft);">Our AI writes a personalized cover letter matched to the specific job — not a generic template.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:16px; align-items:flex-start;">
+            <div style="width:32px; height:32px; border-radius:50%; background:var(--accent-light); color:var(--accent); font-weight:500; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">4</div>
+            <div>
+              <p style="font-weight:500; margin-bottom:4px;">Copy, tweak, and send</p>
+              <p style="font-size:14px; color:var(--ink-soft);">Copy to your clipboard, make any personal tweaks, and paste it into your application.</p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:2rem; padding:1.25rem; background:var(--paper); border-radius:var(--radius); border:1px solid var(--border-soft);">
+          <p style="font-size:13px; color:var(--ink-soft); line-height:1.7;">CoverCraft uses Claude AI to analyze the specific job requirements and match them to your experience — producing a letter that sounds like you, not a robot.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  CoverCraft &nbsp;·&nbsp; Powered by Claude AI &nbsp;·&nbsp; <a href="YOUR_STRIPE_PAYMENT_LINK_HERE" style="color:var(--accent);">Upgrade to Pro</a>
+</footer>
+
+<script>
+  const ANTHROPIC_API_KEY = 'YOUR_ANTHROPIC_API_KEY_HERE';
+  const STRIPE_LINK = 'YOUR_STRIPE_PAYMENT_LINK_HERE';
+  const FREE_USES = 3;
+
+  let usesRemaining = parseInt(localStorage.getItem('covercraft_uses') ?? FREE_USES);
+  let isPro = localStorage.getItem('covercraft_pro') === 'true';
+
+  function updateUsesUI() {
+    const badge = document.getElementById('usesBadge');
+    const upgradeBtn = document.getElementById('upgradeBtn');
+    if (isPro) {
+      badge.innerHTML = '<strong style="color:var(--gold)">Pro</strong> plan';
+      upgradeBtn.style.display = 'none';
+    } else {
+      document.getElementById('usesLeft').textContent = Math.max(0, usesRemaining);
+      if (usesRemaining <= 1) {
+        upgradeBtn.classList.add('visible');
+      }
+    }
+  }
+
+  function switchTab(tab) {
+    document.getElementById('tab-generate').style.display = tab === 'generate' ? 'block' : 'none';
+    document.getElementById('tab-howto').style.display = tab === 'howto' ? 'block' : 'none';
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'generate') || (i === 1 && tab === 'howto'));
+    });
+  }
+
+  async function generateLetter() {
+    const jobDesc = document.getElementById('jobDesc').value.trim();
+    const experience = document.getElementById('experience').value.trim();
+    const userName = document.getElementById('userName').value.trim();
+    const tone = document.querySelector('input[name="tone"]:checked').value;
+    const errorEl = document.getElementById('errorMsg');
+    const outputWrap = document.getElementById('outputWrap');
+    const outputText = document.getElementById('outputText');
+    const spinner = document.getElementById('spinner');
+    const paywall = document.getElementById('paywall');
+    const btn = document.getElementById('generateBtn');
+
+    errorEl.classList.remove('visible');
+    outputWrap.classList.remove('visible');
+    paywall.classList.remove('visible');
+
+    if (!jobDesc || !experience) {
+      errorEl.textContent = 'Please fill in the job description and your experience before generating.';
+      errorEl.classList.add('visible');
+      return;
+    }
+
+    if (!isPro && usesRemaining <= 0) {
+      paywall.classList.add('visible');
+      paywall.querySelectorAll('a').forEach(a => a.href = STRIPE_LINK);
+      return;
+    }
+
+    btn.disabled = true;
+    spinner.classList.add('visible');
+
+    const systemPrompt = `You are an expert cover letter writer. Write compelling, personalized cover letters that match the candidate's experience to the job requirements. Write in a ${tone} tone. Do not use placeholder text like [Company Name] — if the company name isn't provided, write around it naturally. Output only the cover letter text, no commentary.`;
+
+    const userPrompt = `Write a cover letter for this job application.
+
+JOB DESCRIPTION:
+${jobDesc}
+
+CANDIDATE EXPERIENCE & HIGHLIGHTS:
+${experience}
+
+CANDIDATE NAME: ${userName || 'the applicant'}
+
+Write a complete, ready-to-send cover letter. Make it feel personal and specific to this role — not generic. 3-4 paragraphs. Tone: ${tone}.`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userPrompt }]
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || 'Something went wrong. Please try again.');
+      }
+
+      const letter = data.content?.[0]?.text || '';
+
+      spinner.classList.remove('visible');
+      outputText.textContent = '';
+      outputWrap.classList.add('visible');
+      outputText.classList.add('streaming');
+
+      let i = 0;
+      const words = letter.split('');
+      function typeNext() {
+        if (i < words.length) {
+          outputText.textContent += words[i];
+          i++;
+          setTimeout(typeNext, 8);
+        } else {
+          outputText.classList.remove('streaming');
+        }
+      }
+      typeNext();
+
+      if (!isPro) {
+        usesRemaining--;
+        localStorage.setItem('covercraft_uses', usesRemaining);
+        updateUsesUI();
+        if (usesRemaining <= 0) {
+          document.getElementById('upgradeBtn').classList.add('visible');
+        }
+      }
+
+    } catch (err) {
+      spinner.classList.remove('visible');
+      errorEl.textContent = err.message || 'Something went wrong. Please check your API key and try again.';
+      errorEl.classList.add('visible');
+    }
+
+    btn.disabled = false;
+  }
+
+  function copyLetter() {
+    const text = document.getElementById('outputText').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy to clipboard'; }, 2000);
+    });
+  }
+
+  updateUsesUI();
+</script>
+</body>
+</html>
